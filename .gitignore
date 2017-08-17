@@ -1,0 +1,25 @@
+etc/unzipped-beatmap
+data/
+notebooks/
+
+build/
+
+*.egg-info
+
+# python artifacts
+*.pyc
+
+# spearmint
+output/
+
+# osu! API key
+.api-key
+
+.params
+
+.ipynb_checkpoints/*
+*.ipynb
+
+# saved models
+lstm/*
+mlp/*
