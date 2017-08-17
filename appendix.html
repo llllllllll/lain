@@ -1,0 +1,596 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Appendix &mdash; lain 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="lain 0.1.0 documentation" href="index.html"/>
+        <link rel="prev" title="Multiayer Perceptron" href="mlp.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> lain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="lstm.html">LSTM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlp.html">Multiayer Perceptron</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Appendix</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#interface">Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lstm">LSTM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#utilities">Utilities</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">lain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Appendix</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/appendix.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="appendix">
+<h1>Appendix<a class="headerlink" href="#appendix" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="interface">
+<h2>Interface<a class="headerlink" href="#interface" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lain.OsuModel">
+<em class="property">class </em><code class="descclassname">lain.</code><code class="descname">OsuModel</code><a class="reference internal" href="_modules/lain/model.html#OsuModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.OsuModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract osu! prediction model.</p>
+<dl class="method">
+<dt id="lain.OsuModel.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>replays</em>, <em>*</em>, <em>epochs=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/model.html#OsuModel.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.OsuModel.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the model to some replays.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>replays</strong> : iterable[Replay]</p>
+<blockquote>
+<div><p>The replays to fit the model to.</p>
+</div></blockquote>
+<p><strong>verbose</strong> : bool, optional</p>
+<blockquote>
+<div><p>Print verbose information to <code class="docutils literal"><span class="pre">sys.stdout</span></code>?</p>
+</div></blockquote>
+<p><strong>**kwargs</strong></p>
+<blockquote class="last">
+<div><p>Model specific arguments, for example: <code class="docutils literal"><span class="pre">epochs</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="lain.OsuModel.load_path">
+<em class="property">classmethod </em><code class="descname">load_path</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/model.html#OsuModel.load_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.OsuModel.load_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a model from a file path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> : path-like</p>
+<blockquote>
+<div><p>The path to the saved model.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>model</strong> : OsuModel</p>
+<blockquote class="last">
+<div><p>The deserialized osu! model.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lain.OsuModel.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>beatmaps_and_mods</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/model.html#OsuModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.OsuModel.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the user&#8217;s accuracy for a sequence a beatmaps with the given
+mods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>beatmaps_and_mods</strong> : iterable[(Beatmap, dict)]</p>
+<blockquote>
+<div><p>The maps and mods to predict.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>accuracy</strong> : np.ndarray[float]</p>
+<blockquote class="last">
+<div><p>The user&#8217;s expected accuracy in the range [0, 1] for each
+(beatmap, mods) pair.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lain.OsuModel.predict_beatmap">
+<code class="descname">predict_beatmap</code><span class="sig-paren">(</span><em>beatmap</em>, <em>*mods</em>, <em>**mods_scalar</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/model.html#OsuModel.predict_beatmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.OsuModel.predict_beatmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the user&#8217;s accuracy for the given beatmap.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>beatmap</strong> : Beatmap</p>
+<blockquote>
+<div><p>The map to predict the performance of.</p>
+</div></blockquote>
+<p><strong>*mods</strong></p>
+<blockquote>
+<div><p>A sequence of mod dictionaries to predict for.</p>
+</div></blockquote>
+<p><strong>**mods_dict</strong></p>
+<blockquote>
+<div><p>Mods to predict for.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>accuracy</strong> : float</p>
+<blockquote class="last">
+<div><p>The user&#8217;s expected accuracy in the range [0, 1].</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lain.OsuModel.save_path">
+<code class="descname">save_path</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/model.html#OsuModel.save_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.OsuModel.save_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the state of the model to a file path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> : path-like</p>
+<blockquote class="last">
+<div><p>The path to save the model to.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="lstm">
+<h2>LSTM<a class="headerlink" href="#lstm" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lain.LSTM">
+<em class="property">class </em><code class="descclassname">lain.</code><code class="descname">LSTM</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/lstm.html#LSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.LSTM" title="Permalink to this definition">¶</a></dt>
+<dd><p>An LSTM model for osu! which trains on windows of (x, y, time) events.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>context</strong> : int</p>
+<blockquote>
+<div><p>The number of leading and trailing hit objects or slider ticks to look
+at.</p>
+</div></blockquote>
+<p><strong>hidden_layer_sizes</strong> : tuple[int, int]</p>
+<blockquote>
+<div><p>The sizes of the hidden layers.</p>
+</div></blockquote>
+<p><strong>dropout</strong> : float</p>
+<blockquote>
+<div><p>The droput ratio.</p>
+</div></blockquote>
+<p><strong>activation</strong> : str</p>
+<blockquote>
+<div><p>The activation function.</p>
+</div></blockquote>
+<p><strong>loss</strong> : str</p>
+<blockquote>
+<div><p>The loss function.</p>
+</div></blockquote>
+<p><strong>optimizer</strong> : str</p>
+<blockquote>
+<div><p>The optimizer to use.</p>
+</div></blockquote>
+<p><strong>max_hit_objects</strong> : int</p>
+<blockquote class="last">
+<div><p>The maximum number of hit objects allows in a beatmap. Data will be
+padded to fit this shape.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>MLPRegressor</p>
+<dl class="class">
+<dt id="lain.MLPRegressor">
+<em class="property">class </em><code class="descclassname">lain.</code><code class="descname">MLPRegressor</code><span class="sig-paren">(</span><em>*</em>, <em>l2_penalty=0.009</em>, <em>hidden_layer_sizes=(64</em>, <em>200</em>, <em>256</em>, <em>200)</em>, <em>dropout=0.2</em>, <em>activation='tanh'</em>, <em>loss='mse'</em>, <em>optimizer='rmsprop'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/mlp.html#MLPRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.MLPRegressor" title="Permalink to this definition">¶</a></dt>
+<dd><p>An osu! aware MLPRegressor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>l2_penalty</strong> : float</p>
+<blockquote>
+<div><p>L2 penalty (regularization term).</p>
+</div></blockquote>
+<p><strong>hidden_layer_sizes</strong> : iterable[int]</p>
+<blockquote>
+<div><p>The number of neurons in each hidden layer.</p>
+</div></blockquote>
+<p><strong>activation</strong> : str</p>
+<blockquote>
+<div><p>The activation function. Must be one of:
+&#8216;tanh&#8217;, &#8216;softplus, &#8216;softsign&#8217;, &#8216;relu&#8217;, &#8216;sigmoid&#8217;, &#8216;hard_sigmoid&#8217;, or
+&#8216;linear&#8217;.</p>
+</div></blockquote>
+<p><strong>loss</strong> : {&#8216;mse&#8217;, &#8216;mae&#8217;, &#8216;mape&#8217;, &#8216;male&#8217;, &#8216;cosine&#8217;</p>
+<blockquote>
+<div><p>The loss function.</p>
+</div></blockquote>
+<p><strong>optimizer</strong> : str</p>
+<blockquote class="last">
+<div><p>The optimizer to use.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="utilities">
+<h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lain.Scaler">
+<em class="property">class </em><code class="descclassname">lain.</code><code class="descname">Scaler</code><span class="sig-paren">(</span><em>ndim</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/scaler.html#Scaler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.Scaler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scaler for feature arrays.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ndim</strong> : int</p>
+<blockquote class="last">
+<div><p>The number of dimensions of the feature arrays.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="lain.Scaler.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/scaler.html#Scaler.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.Scaler.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the scaler to the data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : np.ndarray</p>
+<blockquote>
+<div><p>The data to fit the scaler to.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>transformed</strong> : np.ndarray</p>
+<blockquote class="last">
+<div><p>The transformed input data.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lain.Scaler.invert">
+<code class="descname">invert</code><span class="sig-paren">(</span><em>scaled_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/scaler.html#Scaler.invert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.Scaler.invert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invert the scaling for some data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scaled_data</strong> : np.ndarray</p>
+<blockquote>
+<div><p>The scaled data.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>data</strong> : np.ndarray</p>
+<blockquote class="last">
+<div><p>The pre-transformed data.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lain.Scaler.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/scaler.html#Scaler.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.Scaler.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale data based on the fit data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : np.ndarray</p>
+<blockquote>
+<div><p>The data to transform.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>transformed</strong> : np.ndarray</p>
+<blockquote class="last">
+<div><p>The transformed input data.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lain.load_replay_directory">
+<code class="descclassname">lain.</code><code class="descname">load_replay_directory</code><span class="sig-paren">(</span><em>path</em>, <em>*</em>, <em>library=None</em>, <em>client=None</em>, <em>age=None</em>, <em>save=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/train.html#load_replay_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.load_replay_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load all eligible replays from a directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> : str or pathlib.Path</p>
+<blockquote>
+<div><p>The path to the directory of <code class="docutils literal"><span class="pre">.osr</span></code> files.</p>
+</div></blockquote>
+<p><strong>library</strong> : Library, optional</p>
+<blockquote>
+<div><p>The beatmap library to use when parsing the replays.</p>
+</div></blockquote>
+<p><strong>client</strong> : Client, optional</p>
+<blockquote>
+<div><p>The client to use when parsing the replays.</p>
+</div></blockquote>
+<p><strong>age</strong> : datetime.timedelta, optional</p>
+<blockquote>
+<div><p>Only count replays less than this age old.</p>
+</div></blockquote>
+<p><strong>save: bool, optional</strong></p>
+<blockquote>
+<div><p>If the beatmap does not exist, and a client is used to fetch it, should
+the beatmap be saved to disk?</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><p class="first"><strong>replay</strong> : Replay</p>
+<blockquote class="last">
+<div><p>The eligible replays in the directory.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The same beatmap may appear more than once if there are multiple replays
+for this beatmap.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="mlp.html" class="btn btn-neutral" title="Multiayer Perceptron" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Joe Jevnik.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
