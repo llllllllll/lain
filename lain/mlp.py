@@ -36,7 +36,7 @@ class MLPRegressor(OsuModel):
     def __init__(self,
                  *,
                  l2_penalty=0.009,
-                 hidden_layer_sizes=(54, 199, 66),
+                 hidden_layer_sizes=(64, 200, 256, 200),
                  dropout=0.2,
                  activation='tanh',
                  loss='mse',
