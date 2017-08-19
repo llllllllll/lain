@@ -40,7 +40,7 @@ class MLPRegressor(OsuModel):
                  dropout=0.2,
                  activation='tanh',
                  loss='mse',
-                 optimizer='rmsprop'):
+                 optimizer='adam'):
         self._feature_scaler = Scaler(ndim=2)
 
         layer = input_ = keras.layers.Input(shape=(len(self.features),))

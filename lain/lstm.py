@@ -10,7 +10,7 @@ from slider.mod import od_to_ms, circle_radius, ar_to_ms
 
 from .model import OsuModel
 from .scaler import Scaler
-from .utils import dichotomize, summary
+from .utils import dichotomize, summary, rolling_window
 
 
 class _InnerLSTM:
@@ -48,23 +48,34 @@ class _InnerLSTM:
     features = {
         k: n for n, k in enumerate(
             (
-                # relative position
-                'relative_x',
-                'relative_y',
-                'relative_time',
                 # absolute position
                 'absolute_x',
                 'absolute_y',
                 'absolute_time',
+
+                # relative position
+                'relative_x',
+                'relative_y',
+                'relative_time',
+
                 # misc.
                 'is_slider_tick',  # 1 if slider tick else 0
                 'approach_rate',  # the map's approach rate
+
+                # distances (magnitude of vector between two hit objects)
+                'distance_from_previous',  # distance from the previous object
+                'distance_to_next',  # distance to the next object
+
+                # angles
+                'pitch',
+                'roll',
+                'yaw',
             ),
         )
     }
-    relative_features_count = sum(
-        1 for f in features if f.startswith('relative_')
-    )
+    _absolule_features_columns = np.s_[0:3]
+    _relative_features_columns = np.s_[3:6]
+    _angle_features_columns = np.s_[10:13]
 
     def __init__(self,
                  *,
@@ -127,6 +138,19 @@ class _InnerLSTM:
 
         self._feature_scaler = Scaler(ndim=3)
 
+    _angle_axes_map = {
+        'yaw': (0, 1),
+        'roll': (0, 2),
+        'pitch': (1, 2),
+    }
+    _raw_features = [
+        features['absolute_x'],
+        features['absolute_y'],
+        features['absolute_time'],
+        features['is_slider_tick'],
+        features['approach_rate'],
+    ]
+
     def _extract_features(self,
                           beatmap,
                           *,
@@ -186,16 +210,10 @@ class _InnerLSTM:
 
             position = hit_object.position
 
-            time = hit_object.time.total_seconds() * 1000
-            x = position.x
-            y = position.y
             append_event((
-                x,
-                y,
-                time,
-                x,
-                y,
-                time,
+                position.x,
+                position.y,
+                hit_object.time.total_seconds() * 1000,
                 0,  # is_slider_tick
                 approach_rate,
             ))
@@ -207,25 +225,70 @@ class _InnerLSTM:
                         x,
                         y,
                         time.total_seconds() * 1000,
-                        x,
-                        y,
-                        time.total_seconds() * 1000,
                         1,  # is_slider_tick
                         approach_rate,
                     )
                     for x, y, time in hit_object.tick_points
                 )
 
-        # convert the events into a 2d array of shape:
-        # (len(events), len(self.features))
-        event_array = np.array(events)
+        # allocate the empty output array
+        out = np.empty((len(events), len(self.features)))
+
+        # fill the output with the directly extracted features
+        out[:, self._raw_features] = events
+        out[:, self._relative_features_columns] = (
+            out[:, self._absolule_features_columns]
+        )
 
         # the baseline data to take windows out of
         baseline = np.vstack([
             np.full((self._trailing_context, len(self.features)), np.nan),
-            event_array,
+            out,
             np.full((self._forward_context, len(self.features)), np.nan),
         ])
+
+        # pull out the x, y, time coordinates
+        coords = baseline[:, self._absolule_features_columns]
+
+        # draw triangles around each object with the leading and trailing hit
+        # object
+        triangles = rolling_window(coords, 3)
+
+        # the squared value of the length of each side in the triangles around
+        # each object across each axis
+        diff_a_b_sq = np.square(triangles[:, 0] - triangles[:, 1])
+        diff_a_c_sq = np.square(triangles[:, 0] - triangles[:, 2])
+        diff_b_c_sq = np.square(triangles[:, 1] - triangles[:, 2])
+
+        # for each hit object and axis (x, y, time), calculate the angle
+        # between the previous hit object and the next hit object
+        for angle_kind, (axis_0, axis_1) in self._angle_axes_map.items():
+            a_b_sq = diff_a_b_sq[:, axis_0] + diff_a_b_sq[:, axis_1]
+            b_c_sq = diff_b_c_sq[:, axis_0] + diff_b_c_sq[:, axis_1]
+
+            numerator = (
+                a_b_sq +
+                b_c_sq -
+                (diff_a_c_sq[:, axis_0] + diff_a_c_sq[:, axis_1])
+            )
+            denominator = (2 * np.sqrt(a_b_sq) * np.sqrt(b_c_sq))
+
+            mask = np.isclose(denominator, 0)
+            numerator[mask] = 1
+            denominator[mask] = 1
+            np.arccos(
+                # clip the values because we sometimes get things like
+                # 1.0000000000000002 which breaks ``np.arccos``
+                np.clip(numerator / denominator, -1, 1),
+                out=baseline[1:-1, self.features[angle_kind]],
+            )
+
+        # compute the distance from hit object to hit object in 3d space
+        # and store the distance from the previous and the distance to the
+        # next
+        distances = np.sqrt(np.square(coords[1:] - coords[:-1]).sum(axis=1))
+        baseline[:-1, self.features['distance_from_previous']] = distances
+        baseline[1:, self.features['distance_to_next']] = distances
 
         # convert the hit object indices into a column vector; we add context
         # to account for the padding
@@ -254,12 +317,12 @@ class _InnerLSTM:
             :,
             self._trailing_context,
             np.newaxis,
-            :self.relative_features_count,
+            self._relative_features_columns,
         ]
 
         # subtract the hit object features from the windows; this makes the
         # window relative to the object being predicted.
-        windows[..., :self.relative_features_count] -= center_values
+        windows[..., self._relative_features_columns] -= center_values
 
         # only accept complete windows
         mask = ~np.isnan(windows).any(axis=(1, 2))
@@ -572,17 +635,6 @@ class _InnerLSTM:
             (cdf_100 - cdf_300) / 3 +
             (cdf_50 - cdf_100) / 6
         )
-
-        @accuracy_distribution.expect
-        def expected_accuracy(error):
-            if error <= hit_windows.hit_300:
-                return 1
-            elif error <= hit_windows.hit_100:
-                return 1 / 3
-            elif error <= hit_windows.hit_50:
-                return 1 / 6
-            else:
-                return 0
 
         return expected_aim * expected_accuracy
 
