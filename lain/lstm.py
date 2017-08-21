@@ -18,6 +18,12 @@ class _InnerLSTM:
 
     Parameters
     ----------
+    aim_pessimism_factor : float
+        An exponential increase in aim error to account for the fact that most
+        replays are heavily biased towards a user's best replays.
+    accuracy_pessimism_factor : float
+        An exponential increase in accuracy error to account for the fact that
+        most replays are heavily biased towards a user's best replays.
     trailing_context : int
         The number of leading trailing hit objects or slider ticks to look at.
     forward_context : int
@@ -79,14 +85,19 @@ class _InnerLSTM:
 
     def __init__(self,
                  *,
+                 aim_pessimism_factor=1.1,
+                 accuracy_pessimism_factor=1.1,
                  trailing_context=10,
                  forward_context=3,
                  batch_size=32,
-                 lstm_hidden_layer_sizes=(64, 128, 256),
+                 lstm_hidden_layer_sizes=(256, 128, 64),
                  dropout=0.1,
                  activation='linear',
-                 loss='mse',
+                 loss='mae',
                  optimizer='rmsprop'):
+
+        self._aim_pessimism_factor = aim_pessimism_factor
+        self._accuracy_pessimism_factor = accuracy_pessimism_factor
 
         self._trailing_context = trailing_context
         self._forward_context = forward_context
@@ -446,6 +457,39 @@ class _InnerLSTM:
 
         return aim_error, accuracy_error
 
+    def _sample_weights(self, aim_error, accuracy_error):
+        """Sample weights based on the error.
+
+        Parameters
+        ----------
+        aim_error : np.ndarray
+            The aim errors for each sample.
+        accuracy_error : np.ndarray
+            The accuracy error errors for each sample.
+
+        Returns
+        -------
+        weights : np.ndarray
+            The weights for each sample.
+
+        Notes
+        -----
+        This weighs samples based on their standard deviations above the mean
+        with some clipping.
+        """
+        aim_zscore = (aim_error - aim_error.mean()) / aim_error.std()
+        aim_weight = np.clip(aim_zscore, 1, 4) / 4
+
+        accuracy_zscore = (
+            accuracy_error - accuracy_error.mean()
+        ) / accuracy_error.std()
+        accuracy_weight = np.clip(accuracy_zscore, 1, 4) / 4
+
+        return {
+            'aim_error': aim_weight,
+            'accuracy_error': accuracy_weight,
+        }
+
     def fit(self, replays, *, verbose=False, epochs=10):
         extract_features = self._extract_features
         extract_differences = self._extract_differences
@@ -496,11 +540,13 @@ class _InnerLSTM:
             verbose=int(bool(verbose)),
             batch_size=self._batch_size,
             epochs=epochs,
+            sample_weight=self._sample_weights(aim_error, accuracy_error),
         )
 
     def predict_differences(self,
                             beatmap,
                             *,
+                            pessimistic=True,
                             double_time=False,
                             half_time=False,
                             hard_rock=False):
@@ -510,6 +556,8 @@ class _InnerLSTM:
         ----------
         beatmap : Beatmap
             The beatmap to predict.
+        pessimistic : bool, optional
+            Apply pessimistic error scaling?
         double_time : bool, optional
             Predict double time offsets.
         half_time : bool, optional
@@ -524,7 +572,7 @@ class _InnerLSTM:
         accuracy_error : np.ndarray
             The predicted magnitude of time error in milliseconds.
         """
-        return self._model.predict(
+        aim_error, accuracy_error = self._model.predict(
             self._feature_scaler.transform(
                 self._extract_features(
                     beatmap,
@@ -534,6 +582,12 @@ class _InnerLSTM:
                 )[0],
             ),
         )
+
+        if pessimistic:
+            aim_error **= self._aim_pessimism_factor
+            accuracy_error **= self._accuracy_pessimism_factor
+
+        return aim_error, accuracy_error
 
     def _fit_lognorm_distribution(self, array):
         """Fit a probability distribution to the array.
@@ -553,6 +607,7 @@ class _InnerLSTM:
     def _predict_accuracy(self,
                           beatmap,
                           *,
+                          pessimistic=True,
                           double_time=False,
                           half_time=False,
                           hard_rock=False):
@@ -562,6 +617,8 @@ class _InnerLSTM:
         ----------
         beatmap : Beatmap
             The beatmap to predict.
+        pessimistic : bool, optional
+            Apply pessimistic error scaling?
         double_time : bool, optional
             Predict double time offsets.
         half_time : bool, optional
@@ -579,6 +636,7 @@ class _InnerLSTM:
             double_time=double_time,
             half_time=half_time,
             hard_rock=hard_rock,
+            pessimistic=pessimistic,
         )
 
         # fit the distributions to the predicted data
@@ -638,17 +696,25 @@ class _InnerLSTM:
 
         return expected_aim * expected_accuracy
 
-    def predict_one(self, beatmap, mods):
+    def predict_one(self, beatmap, mods, pessimistic):
         return self._predict_accuracy(
             beatmap,
             double_time=mods['double_time'],
             half_time=mods['half_time'],
             hard_rock=mods['hard_rock'],
+            pessimistic=pessimistic,
         )
 
     def save_path(self, path):
         self._model.save(path)
         self._feature_scaler.save_path(path.with_suffix('.feature_scaler'))
+
+        with open(path.with_suffix('.pessimism'), 'wb') as f:
+            np.savez(
+                f,
+                aim_pessimism_factor=self._aim_pessimism_factor,
+                accuracy_pessimism_factor=self._accuracy_pessimism_factor,
+            )
 
     @classmethod
     def load_path(cls, path):
@@ -657,6 +723,11 @@ class _InnerLSTM:
         self._feature_scaler = Scaler.load_path(
             path.with_suffix('.feature_scaler'),
         )
+
+        with np.load(str(path.with_suffix('.pessimism'))) as f:
+            self._aim_pessimism_factor = f['aim_pessimism_factor']
+            self._accuracy_pessimism_factor = f['accuracy_pessimism_factor']
+
         return self
 
 
@@ -731,7 +802,7 @@ class LSTM(OsuModel):
 
         return hidden_history, non_hidden_history
 
-    def predict(self, beatmaps_and_mods):
+    def predict(self, beatmaps_and_mods, *, pessimistic=True):
         hidden_model_predict = self._hidden_model.predict_one
         non_hidden_model_predict = self._non_hidden_model.predict_one
 
@@ -740,17 +811,50 @@ class LSTM(OsuModel):
                 hidden_model_predict
                 if mods['hidden'] else
                 non_hidden_model_predict
-            )(beatmap, mods)
+            )(beatmap, mods, pessimistic=pessimistic)
             for beatmap, mods in beatmaps_and_mods
         ])
 
-    def predict_differences(self, beatmaps_and_mods):
+    def predict_beatmap(self,
+                        beatmap,
+                        *mods,
+                        pessimistic=True,
+                        **mods_scalar):
+        """Predict the user's accuracy for the given beatmap.
+
+        Parameters
+        ----------
+        beatmap : Beatmap
+            The map to predict the performance of.
+        pessimistic : bool
+            Apply pessimistic error scaling?
+        *mods
+            A sequence of mod dictionaries to predict for.
+        **mods_dict
+            Mods to predict for.
+
+        Returns
+        -------
+        accuracy : float
+            The user's expected accuracy in the range [0, 1].
+        """
+        for mod_name in 'hidden', 'hard_rock', 'half_time', 'double_time':
+            mods_scalar.setdefault(mod_name, False)
+
+        return self.predict(
+            [(beatmap, ms) for ms in chain(mods, [mods_scalar])],
+            pessimistic=pessimistic,
+        )
+
+    def predict_differences(self, beatmaps_and_mods, *, pessimistic=True):
         """Low level predictions for a sequence of beatmaps and mods.
 
         Parameters
         ----------
         beatmaps_and_mods : iterable[(Beatmap, dict)]
             The maps and mods to predict.
+        pessimistic : bool
+            Apply pessimistic error scaling?
 
         Returns
         -------
@@ -780,17 +884,24 @@ class LSTM(OsuModel):
                 double_time=mods['double_time'],
                 half_time=mods['half_time'],
                 hard_rock=mods['hard_rock'],
+                pessimistic=pessimistic,
             )
             for beatmap, mods in beatmaps_and_mods
         ]
 
-    def predict_beatmap_differences(self, beatmap, *mods, **mods_scalar):
+    def predict_beatmap_differences(self,
+                                    beatmap,
+                                    *mods,
+                                    pessimistic=True,
+                                    **mods_scalar):
         """Predict the user's accuracy for the given beatmap.
 
         Parameters
         ----------
         beatmap : Beatmap
             The map to predict per hit object differences of.
+        pessimistic : bool, optional
+            Apply pessimistic error scaling?
         *mods
             A sequence of mod dictionaries to predict per hit object
             differences for.
@@ -813,6 +924,7 @@ class LSTM(OsuModel):
         for mod_name in 'hidden', 'hard_rock', 'half_time', 'double_time':
             mods_scalar.setdefault(mod_name, False)
 
-        return self.predict_differences([
-            (beatmap, ms) for ms in chain(mods, [mods_scalar])
-        ])
+        return self.predict_differences(
+            [(beatmap, ms) for ms in chain(mods, [mods_scalar])],
+            pessimistic=pessimistic,
+        )

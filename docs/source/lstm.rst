@@ -61,6 +61,10 @@ Network
 The network consists of stacked long short-term memory layers feeding into one
 densly connected layer for each error output.
 
+To better learn what the user finds difficult, we weigh the samples based on
+their zscore. Concretely we clip the zscore from 1 to 4 and weigh the samples
+based on that value.
+
 Reducing Error to Accuracy
 ``````````````````````````
 
@@ -85,3 +89,13 @@ accuracy value is the sum of these weighted probabilities.
 
 The final expected score is the expected aim multiplied by the expected
 accuracy.
+
+Pessimism Factors
+`````````````````
+
+Replays are only saved when a user completes a song. This heavily biases the
+input samples to only be the user's best replays and makes it hard if not
+impossible to learn what the user finds hard. We need to magnify the projected
+error to actually see some misses or 50s so we apply a scaling factor.
+
+Currently this is quite small at 1.05 for both aim and accuracy error.
