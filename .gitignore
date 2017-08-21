@@ -23,3 +23,7 @@ output/
 # saved models
 lstm/*
 mlp/*
+*.bak/*
+
+# saved temp arrays
+*.npy
