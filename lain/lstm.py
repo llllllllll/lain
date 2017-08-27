@@ -353,8 +353,6 @@ class _InnerLSTM:
 
         Returns
         -------
-        Returns
-        -------
         differences : np.ndarray
             An array of shape (len(hit_objects), 2) where the first column
             is the time offset in milliseconds and the second column is the

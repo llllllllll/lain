@@ -21,8 +21,8 @@ object.
 For more information see `the docs
 <https://llllllllll.github.io/lain/lstm.html>`_.
 
-Multiayer Perceptron
---------------------
+Multilayer Perceptron
+---------------------
 
 The goal of the multilayer perceptron model is to learn how a user performs by
 looking at many weakly predictive features of beatmaps.
