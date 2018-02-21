@@ -785,10 +785,10 @@ class LSTM(OsuModel):
         if verbose:
             print('fitting the hidden replays')
         hidden_history = self._hidden_model.fit(
-                hidden,
-                verbose=verbose,
-                epochs=epochs,
-            )
+            hidden,
+            verbose=verbose,
+            epochs=epochs,
+        )
 
         if verbose:
             print('fitting the non-hidden replays')

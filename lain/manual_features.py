@@ -58,7 +58,6 @@ features = tuple(sorted((
 )))
 
 
-
 @unique
 class Axis(IntEnum):
     """Axis indices.
