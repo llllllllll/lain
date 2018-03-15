@@ -1,5 +1,7 @@
 from datetime import datetime
 import os
+import sys
+import traceback
 
 from slider.game_mode import GameMode
 from slider.replay import Replay
@@ -10,7 +12,8 @@ def load_replay_directory(path,
                           library=None,
                           client=None,
                           age=None,
-                          save=False):
+                          save=False,
+                          verbose=False):
     """Load all eligible replays from a directory.
 
     Parameters
@@ -26,6 +29,8 @@ def load_replay_directory(path,
     save: bool, optional
         If the beatmap does not exist, and a client is used to fetch it, should
         the beatmap be saved to disk?
+    verbose : bool, optional
+        Print error information to stderr?
 
     Yields
     ------
@@ -50,6 +55,10 @@ def load_replay_directory(path,
                     save=save,
                 )
             except Exception:
+                if verbose:
+                    print(f'failed to read replay {entry}', file=sys.stderr)
+                    traceback.print_exc(file=sys.stderr)
+
                 # throw out any maps that fail to parse or download
                 continue
 
