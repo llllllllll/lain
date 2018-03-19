@@ -864,6 +864,25 @@ class ErrorModel:
         return self
 
     def fit(self, replays, *, verbose=False, epochs=10):
+        """Fit the model to data.
+
+        Parameters
+        ----------
+        replays : iterable[sl.Replay]
+            The replays to fit the model to.
+        verbose : bool, optional
+            Print verbose messages to stdout?
+        epochs : int, optional
+            The number of times to pass through the replays.
+
+        Returns
+        -------
+        hidden_history : keras.History
+            The history of training the keras model on the replays with hidden.
+        non_hidden_history : keras.History
+            The history of training the keras model on the replays without
+            hidden.
+        """
         hidden, non_hidden = dichotomize(lambda replay: replay.hidden, replays)
 
         if verbose:
