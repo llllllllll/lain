@@ -1,15 +1,77 @@
-from itertools import chain
 import pathlib
 
 import cytoolz as toolz
 import keras
 import numpy as np
 import scipy.stats
-from slider.beatmap import Slider
-from slider.mod import od_to_ms, circle_radius, ar_to_ms
+import slider as sl
 
 from .scaler import Scaler
 from .utils import dichotomize, summary, rolling_window
+
+
+class Prediction:
+    """The model's predicted values.
+
+    Attributes
+    ----------
+    predicted_aim_error : np.ndarray[float64]
+        The predicted aim errors for each object.
+    predicted_aim_distribution : scipy.stats.lognorm
+        The predicted distribution of aim errors.
+    predicted_accuracy_error : np.ndarray[float64]
+        The predicted accuracy errors for each object.
+    predicted_accuracy_distribution : scipy.stats.lognorm
+        The predicted distribution of accuracy errors.
+    accuracy_mean : float
+        The mean predicted accuracy.
+    accuracy_std : float
+        The standard deviation of the predicted accuracy.
+    pp_mean : float
+        The mean predicted performance points.
+    pp_std : float
+        The standard deviation of the predicted performance points.
+    miss_chance : float
+        The chance to miss at least one circle in the beatmap.
+    """
+    def __init__(self,
+                 *,
+                 predicted_aim_error,
+                 predicted_aim_distribution,
+                 predicted_accuracy_error,
+                 predicted_accuracy_distribution,
+                 accuracy_mean,
+                 accuracy_std,
+                 pp_mean,
+                 pp_std,
+                 miss_chance):
+        self.predicted_aim_error = predicted_aim_error
+        self.predicted_aim_distribution = predicted_aim_distribution
+        self.predicted_accuracy_error = predicted_accuracy_error
+        self.predicted_accuracy_distribution = predicted_accuracy_distribution
+        self.accuracy_mean = accuracy_mean
+        self.accuracy_std = accuracy_std
+        self.pp_mean = pp_mean
+        self.pp_std = pp_std
+        self.miss_chance = miss_chance
+
+    @property
+    def full_clear_chance(self):
+        """The chance to full clear the beatmap.
+        """
+        return 1 - self.miss_chance
+
+    def to_dict(self):
+        """Convert the results to a dictionary.
+
+        Returns
+        -------
+        d : dict
+            A dictionary with all of the fields an properties.
+        """
+        out = vars(self).copy()
+        out['full_clear_chance'] = self.full_clear_chance
+        return out
 
 
 class _InnerErrorModel:
@@ -18,6 +80,8 @@ class _InnerErrorModel:
 
     Parameters
     ----------
+    hidden : bool
+        Is this the hidden model?
     aim_pessimism_factor : float
         An exponential increase in aim error to account for the fact that most
         replays are heavily biased towards a user's best replays.
@@ -84,6 +148,7 @@ class _InnerErrorModel:
     _angle_features_columns = np.s_[10:13]
 
     def __init__(self,
+                 hidden,
                  *,
                  aim_pessimism_factor=1.1,
                  accuracy_pessimism_factor=1.1,
@@ -95,6 +160,7 @@ class _InnerErrorModel:
                  activation='linear',
                  loss='mae',
                  optimizer='rmsprop'):
+        self.hidden = hidden
 
         self._aim_pessimism_factor = aim_pessimism_factor
         self._accuracy_pessimism_factor = accuracy_pessimism_factor
@@ -172,7 +238,7 @@ class _InnerErrorModel:
 
         Parameters
         ----------
-        beatmap : Beatmap
+        beatmap : sl.Beatmap
             The beatmap to extract features for.
         double_time : bool, optional
             Extract features for double time?
@@ -189,7 +255,7 @@ class _InnerErrorModel:
             A mask of valid hit objects.
         """
         hit_objects = beatmap.hit_objects_no_spinners
-        approach_rate = ar_to_ms(
+        approach_rate = sl.mod.ar_to_ms(
             beatmap.ar(
                 double_time=double_time,
                 half_time=half_time,
@@ -229,7 +295,7 @@ class _InnerErrorModel:
                 approach_rate,
             ))
 
-            if isinstance(hit_object, Slider):
+            if isinstance(hit_object, sl.beatmap.Slider):
                 # add all the slider ticks
                 extend_events(
                     (
@@ -434,7 +500,7 @@ class _InnerErrorModel:
         np.clip(
             aim_error,
             0,
-            2 * circle_radius(replay.beatmap.cs(hard_rock=hard_rock)),
+            2 * sl.mod.circle_radius(replay.beatmap.cs(hard_rock=hard_rock)),
             out=aim_error,
         )
 
@@ -445,7 +511,7 @@ class _InnerErrorModel:
         np.clip(
             accuracy_error,
             0,
-            1.5 * od_to_ms(replay.beatmap.od(
+            1.5 * sl.mod.od_to_ms(replay.beatmap.od(
                 hard_rock=hard_rock,
                 double_time=double_time,
                 half_time=half_time,
@@ -541,18 +607,34 @@ class _InnerErrorModel:
             sample_weight=self._sample_weights(aim_error, accuracy_error),
         )
 
-    def predict_differences(self,
-                            beatmap,
-                            *,
-                            pessimistic=True,
-                            double_time=False,
-                            half_time=False,
-                            hard_rock=False):
+    @staticmethod
+    def _fit_lognorm_distribution(array):
+        """Fit a probability distribution to the array.
+
+        Parameters
+        ----------
+        array : np.ndarray
+            The data to fit.
+
+        Returns
+        -------
+        distribution : scipy.stats.lognorm
+            A frozen distribution instance.
+        """
+        return scipy.stats.lognorm(*scipy.stats.lognorm.fit(array))
+
+    def _predict_raw_error(self,
+                           beatmap,
+                           *,
+                           pessimistic=True,
+                           double_time=False,
+                           half_time=False,
+                           hard_rock=False):
         """Predict the time and position differences for each circle.
 
         Parameters
         ----------
-        beatmap : Beatmap
+        beatmap : sl.Beatmap
             The beatmap to predict.
         pessimistic : bool, optional
             Apply pessimistic error scaling?
@@ -587,33 +669,20 @@ class _InnerErrorModel:
 
         return aim_error, accuracy_error
 
-    def _fit_lognorm_distribution(self, array):
-        """Fit a probability distribution to the array.
-
-        Parameters
-        ----------
-        array : np.ndarray
-            The data to fit.
-
-        Returns
-        -------
-        distribution : scipy.stats.lognorm
-            A frozen distribution instance.
-        """
-        return scipy.stats.lognorm(*scipy.stats.lognorm.fit(array))
-
-    def _predict_accuracy(self,
-                          beatmap,
-                          *,
-                          pessimistic=True,
-                          double_time=False,
-                          half_time=False,
-                          hard_rock=False):
+    def predict(self,
+                beatmap,
+                *,
+                pessimistic=True,
+                double_time=False,
+                half_time=False,
+                hard_rock=False,
+                random_state=None,
+                samples=1000):
         """Predict the user's accuracy on the beatmap with the given mods.
 
         Parameters
         ----------
-        beatmap : Beatmap
+        beatmap : sl.Beatmap
             The beatmap to predict.
         pessimistic : bool, optional
             Apply pessimistic error scaling?
@@ -623,13 +692,17 @@ class _InnerErrorModel:
             Predict half time offsets.
         hard_rock : bool, optional
             Predict hard_rock offsets.
+        random_state : np.random.RandomState, optional
+            The numpy random state used to draw samples.
+        samples : int, optional
+            The number of plays to simulate.
 
         Returns
         -------
-        predicted_accuracy : float
-            A scalar value for the user's predicted accuracy.
+        prediction : Prediction
+            A collection of predicted values for this play.
         """
-        aim_error, accuracy_error = self.predict_differences(
+        aim_error, accuracy_error = self._predict_raw_error(
             beatmap,
             double_time=double_time,
             half_time=half_time,
@@ -641,66 +714,70 @@ class _InnerErrorModel:
         aim_distribution = self._fit_lognorm_distribution(aim_error)
         accuracy_distribution = self._fit_lognorm_distribution(accuracy_error)
 
-        # the expected aim is the probability that a user clicks within the
-        # radius of a circle
-        expected_aim = aim_distribution.cdf(
-            circle_radius(beatmap.cs(hard_rock=hard_rock)),
+        predicted_object_count = len(beatmap.hit_objects_no_spinners)
+        spinner_count = len(beatmap.hit_objects) - predicted_object_count
+
+        aim_samples = aim_distribution.rvs(
+            predicted_object_count * samples,
+            random_state=random_state,
+        )
+        accuracy_samples = accuracy_distribution.rvs(
+            predicted_object_count * samples,
+            random_state=random_state,
         )
 
-        hit_windows = od_to_ms(
-            beatmap.od(
-                hard_rock=hard_rock,
-                double_time=double_time,
-                half_time=half_time,
+        hit_windows = np.array([
+            sl.mod.od_to_ms(
+                beatmap.od(
+                    hard_rock=hard_rock,
+                    double_time=double_time,
+                    half_time=half_time,
+                ),
             ),
+        ]).T
+
+        circle_radius = sl.mod.circle_radius(beatmap.cs(hard_rock=hard_rock))
+
+        simulated_300, simulated_100, simulated_50, simulated_miss = (
+            3 - (
+                (aim_samples <= circle_radius) &
+                (accuracy_samples <= hit_windows)
+            ).sum(axis=0) ==
+            np.array([[0, 1, 2, 3]]).T
+        ).T.reshape(samples, -1, 4).sum(axis=1).T
+        simulated_300 += spinner_count  # assume perfect spinners
+
+        simulated_accuracies = sl.utils.accuracy(
+            simulated_300,
+            simulated_100,
+            simulated_50,
+            simulated_miss,
         )
 
-        # To find the expected accuracy we need to calculate the probability of
-        # clicking within the 300 threshold, between the 300 and 100
-        # thresholds, and between the 100 and 50 thresholds. To find the
-        # probability that a click falls between the given thresholds we need
-        # to integrate the pdf from the starting threshold to the ending
-        # threshold. Visually this looks like:
-        #
-        # Probability of clicking at a given time
-        #
-        #      |      ^
-        #      |     / \
-        #      |    /   -.
-        # P(x) |   /    : \.
-        #      |  /     :   \
-        #      | |      :    ---
-        #      | |      :      :\--..,..
-        #      -------------------------
-        #      :        :  ms  :     :
-        #      :        :      :     :
-        #      :  P(300):P(100):P(50):P(miss)
-        #
-        # We weigh the probabilities by the accuracy the givey, so we multiply
-        # the probability of clicking within the 300 range by 1, we multiply
-        # the probability of clicking within the 300-100 range by 1 / 3, we
-        # multiply the probability of clicking within the 100-50 range by
-        # 1 / 6, and finally we implicitly multiply the probability of missing
-        # entirely by 0. The expected accuracy value is the sum of these
-        # weighted probabilities.
-        cdf_300 = accuracy_distribution.cdf(hit_windows.hit_300)
-        cdf_100 = accuracy_distribution.cdf(hit_windows.hit_100)
-        cdf_50 = accuracy_distribution.cdf(hit_windows.hit_50)
-        expected_accuracy = (
-            cdf_300 +
-            (cdf_100 - cdf_300) / 3 +
-            (cdf_50 - cdf_100) / 6
+        simulated_pp = beatmap.performance_points(
+            count_300=simulated_300,
+            count_100=simulated_100,
+            count_50=simulated_50,
+            count_miss=simulated_miss,
+            hidden=self.hidden,
+            hard_rock=hard_rock,
+            double_time=double_time,
+            half_time=half_time,
         )
 
-        return expected_aim * expected_accuracy
+        chance_to_miss_scalar = aim_distribution.cdf(circle_radius)
+        miss_chance = chance_to_miss_scalar ** predicted_object_count
 
-    def predict_one(self, beatmap, mods, pessimistic):
-        return self._predict_accuracy(
-            beatmap,
-            double_time=mods['double_time'],
-            half_time=mods['half_time'],
-            hard_rock=mods['hard_rock'],
-            pessimistic=pessimistic,
+        return Prediction(
+            predicted_aim_error=aim_error,
+            predicted_aim_distribution=aim_distribution,
+            predicted_accuracy_error=accuracy_error,
+            predicted_accuracy_distribution=accuracy_distribution,
+            accuracy_mean=simulated_accuracies.mean(),
+            accuracy_std=simulated_accuracies.std(),
+            pp_mean=simulated_pp.mean(),
+            pp_std=simulated_pp.std(),
+            miss_chance=miss_chance,
         )
 
     def save_path(self, path):
@@ -715,8 +792,8 @@ class _InnerErrorModel:
             )
 
     @classmethod
-    def load_path(cls, path):
-        self = cls()
+    def load_path(cls, path, *, hidden):
+        self = cls(hidden=hidden)
         self._model = keras.models.load_model(path)
         self._feature_scaler = Scaler.load_path(
             path.with_suffix('.feature_scaler'),
@@ -738,13 +815,25 @@ class ErrorModel:
     context : int
         The number of leading and trailing hit objects or slider ticks to look
         at.
+    aim_pessimism_factor : float
+        An exponential increase in aim error to account for the fact that most
+        replays are heavily biased towards a user's best replays.
+    accuracy_pessimism_factor : float
+        An exponential increase in accuracy error to account for the fact that
+        most replays are heavily biased towards a user's best replays.
+    trailing_context : int
+        The number of leading trailing hit objects or slider ticks to look at.
+    forward_context : int
+        The number of forward hit objects or slider ticks to look at.
     hidden_layer_sizes : tuple[int, int]
         The sizes of the hidden layers.
     dropout : float
         The droput ratio.
     activation : str
-        The activation function.
-    loss : str
+        The activation function. Must be one of:
+        'tanh', 'softplus, 'softsign', 'relu', 'sigmoid', 'hard_sigmoid', or
+        'linear'.
+    loss : {'mse', 'mae', 'mape', 'male', 'cosine'
         The loss function.
     optimizer : str
         The optimizer to use.
@@ -755,8 +844,8 @@ class ErrorModel:
     version = 0
 
     def __init__(self, *args, **kwargs):
-        self._hidden_model = _InnerErrorModel(*args, **kwargs)
-        self._non_hidden_model = _InnerErrorModel(*args, **kwargs)
+        self._hidden_model = _InnerErrorModel(True, *args, **kwargs)
+        self._non_hidden_model = _InnerErrorModel(False, *args, **kwargs)
 
     def save_path(self, path):
         path = pathlib.Path(path)
@@ -776,9 +865,13 @@ class ErrorModel:
             )
 
         self = cls()
-        self._hidden_model = _InnerErrorModel.load_path(path / 'hidden')
+        self._hidden_model = _InnerErrorModel.load_path(
+            path / 'hidden',
+            hidden=True,
+        )
         self._non_hidden_model = _InnerErrorModel.load_path(
             path / 'non-hidden',
+            hidden=False,
         )
         return self
 
@@ -803,129 +896,53 @@ class ErrorModel:
 
         return hidden_history, non_hidden_history
 
-    def predict(self, beatmaps_and_mods, *, pessimistic=True):
-        hidden_model_predict = self._hidden_model.predict_one
-        non_hidden_model_predict = self._non_hidden_model.predict_one
-
-        return np.array([
-            (
-                hidden_model_predict
-                if mods['hidden'] else
-                non_hidden_model_predict
-            )(beatmap, mods, pessimistic=pessimistic)
-            for beatmap, mods in beatmaps_and_mods
-        ])
-
-    def predict_beatmap(self,
-                        beatmap,
-                        *mods,
-                        pessimistic=True,
-                        **mods_scalar):
-        """Predict the user's accuracy for the given beatmap.
-
-        Parameters
-        ----------
-        beatmap : Beatmap
-            The map to predict the performance of.
-        pessimistic : bool
-            Apply pessimistic error scaling?
-        *mods
-            A sequence of mod dictionaries to predict for.
-        **mods_dict
-            Mods to predict for.
-
-        Returns
-        -------
-        accuracy : float
-            The user's expected accuracy in the range [0, 1].
-        """
-        for mod_name in 'hidden', 'hard_rock', 'half_time', 'double_time':
-            mods_scalar.setdefault(mod_name, False)
-
-        return self.predict(
-            [(beatmap, ms) for ms in chain(mods, [mods_scalar])],
-            pessimistic=pessimistic,
-        )
-
-    def predict_differences(self, beatmaps_and_mods, *, pessimistic=True):
-        """Low level predictions for a sequence of beatmaps and mods.
-
-        Parameters
-        ----------
-        beatmaps_and_mods : iterable[(Beatmap, dict)]
-            The maps and mods to predict.
-        pessimistic : bool
-            Apply pessimistic error scaling?
-
-        Returns
-        -------
-        differences : list[np.ndarray[float]]
-            For each beatmap and mod combination, an array of shape
-            ``(len(hit_objects), 2)`` where the first column holds the
-            predicted absolute click offset from the center of the circle and
-            the second column holds the absolute time offset for the predicted
-            click. The row indices match the order the beatmap and mod
-            combinations are passed.
-
-        Notes
-        -----
-        This method is specific to the :class:`~slider.model.lstm.LSTM` model,
-        it may not be available on other model types.
-        """
-        hidden_model_predict = self._hidden_model.predict_differences
-        non_hidden_model_predict = self._non_hidden_model.predict_differences
-
-        return [
-            (
-                hidden_model_predict
-                if mods['hidden'] else
-                non_hidden_model_predict
-            )(
+    def predict(self,
                 beatmap,
-                double_time=mods['double_time'],
-                half_time=mods['half_time'],
-                hard_rock=mods['hard_rock'],
-                pessimistic=pessimistic,
-            )
-            for beatmap, mods in beatmaps_and_mods
-        ]
-
-    def predict_beatmap_differences(self,
-                                    beatmap,
-                                    *mods,
-                                    pessimistic=True,
-                                    **mods_scalar):
-        """Predict the user's accuracy for the given beatmap.
+                *,
+                pessimistic=True,
+                hidden=False,
+                double_time=False,
+                half_time=False,
+                hard_rock=False,
+                random_state=None,
+                samples=1000):
+        """Predict the user's accuracy on the beatmap with the given mods.
 
         Parameters
         ----------
-        beatmap : Beatmap
-            The map to predict per hit object differences of.
+        beatmap : sl.Beatmap
+            The beatmap to predict.
         pessimistic : bool, optional
             Apply pessimistic error scaling?
-        *mods
-            A sequence of mod dictionaries to predict per hit object
-            differences for.
-        **mods_dict
-            Mods to predict per hit object differences for.
+        hidden : bool, optional
+            Predict performance with hidden?
+        double_time : bool, optional
+            Predict performance with double time?
+        half_time : bool, optional
+            Predict performance with half time?
+        hard_rock : bool, optional
+            Predict performance with hard rock?
+        random_state : np.random.RandomState, optional
+            The numpy random state used to draw samples.
+        samples : int, optional
+            The number of plays to simulate.
 
         Returns
         -------
-        differences :list[np.ndarray[float]]
-            For each mod combination, an array of shape
-            ``(len(hit_objects), 2)`` where the first column is the user's
-            expected absolute difference for the click position and the second
-            column is the expected absolute difference click time.
-
-        Notes
-        -----
-        This method is specific to the :class:`~slider.model.lstm.LSTM` model,
-        it may not be available on other model types.
+        prediction : Prediction
+            A collection of predicted values for this play.
         """
-        for mod_name in 'hidden', 'hard_rock', 'half_time', 'double_time':
-            mods_scalar.setdefault(mod_name, False)
+        if hidden:
+            predict = self._hidden_model.predict
+        else:
+            predict = self._non_hidden_model.predict
 
-        return self.predict_differences(
-            [(beatmap, ms) for ms in chain(mods, [mods_scalar])],
+        return predict(
+            beatmap,
             pessimistic=pessimistic,
+            double_time=double_time,
+            half_time=half_time,
+            hard_rock=hard_rock,
+            random_state=random_state,
+            samples=samples,
         )
