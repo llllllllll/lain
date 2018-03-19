@@ -1,13 +1,10 @@
-from .lstm import LSTM
-from .mlp import MLPRegressor
-from .model import OsuModel
+from .error_model import ErrorModel
 from .scaler import Scaler
 from .train import load_replay_directory
 
 
 __all__ = [
-    'LSTM',
-    'MLPRegressor',
+    'ErrorModel',
     'OsuModel',
     'Scaler',
     'load_replay_directory',

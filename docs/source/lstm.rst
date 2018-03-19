@@ -1,12 +1,12 @@
-LSTM
-----
+ErrorModel
+----------
 
-The goal of the :class:`~lain.LSTM` model is to learn the user's tendencies by
-looking at maps on the detail individual hit objects. The LSTM model tries to
-predict the user's expected accuracy by learning what their expected error will
-be on any given object.
+The goal of the :class:`~lain.ErrorModel` model is to learn the user's
+tendencies by looking at maps on the detail individual hit objects. The error
+model tries to predict the user's expected accuracy by learning what their
+expected error will be on any given object.
 
-the LSTM model defines two kinds of error:
+the ErrorModel model defines two kinds of error:
 
 Aim Error
 ~~~~~~~~~
@@ -23,7 +23,7 @@ time when a hit object appears in the map.
 Events
 ``````
 
-The LSTM model works by breaking down a beatmap into a sequence of events. An
+The ErrorModel model works by breaking down a beatmap into a sequence of events. An
 event is defined as the (x, y, time) position of each circle, slider, or slider
 tick. Spinners are not included in the events because, for the users and maps we
 are interested in working with, spinners always result in a score of 300 and can
@@ -40,7 +40,7 @@ beatmap in milliseconds.
 Windows
 ```````
 
-After extracting the sequence of events from a beatmap, the LSTM model takes a
+After extracting the sequence of events from a beatmap, the error model takes a
 sliding window over the events . Each window is designed to capture some leading
 and trailing context for a given hit object. Windows are only ever "centered"
 around hit objects, not slider ticks. By default, the leading context is much
@@ -68,7 +68,7 @@ based on that value.
 Reducing Error to Accuracy
 ``````````````````````````
 
-The overall goal is to predict a user's accuracy. The LSTM model reduces the
+The overall goal is to predict a user's accuracy. The error model reduces the
 predicted errors into a scalar accuracy by fitting one log-normal distribution
 for each set of predicted errors.
 
