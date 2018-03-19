@@ -227,6 +227,43 @@ padded to fit this shape.</p>
 </tbody>
 </table>
 <dl class="method">
+<dt id="lain.ErrorModel.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>replays</em>, <em>*</em>, <em>verbose=False</em>, <em>epochs=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/error_model.html#ErrorModel.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.ErrorModel.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the model to data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>replays</strong> : iterable[sl.Replay]</p>
+<blockquote>
+<div><p>The replays to fit the model to.</p>
+</div></blockquote>
+<p><strong>verbose</strong> : bool, optional</p>
+<blockquote>
+<div><p>Print verbose messages to stdout?</p>
+</div></blockquote>
+<p><strong>epochs</strong> : int, optional</p>
+<blockquote>
+<div><p>The number of times to pass through the replays.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>hidden_history</strong> : keras.History</p>
+<blockquote>
+<div><p>The history of training the keras model on the replays with hidden.</p>
+</div></blockquote>
+<p><strong>non_hidden_history</strong> : keras.History</p>
+<blockquote class="last">
+<div><p>The history of training the keras model on the replays without
+hidden.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="lain.ErrorModel.predict">
 <code class="descname">predict</code><span class="sig-paren">(</span><em>beatmap</em>, <em>*</em>, <em>pessimistic=True</em>, <em>hidden=False</em>, <em>double_time=False</em>, <em>half_time=False</em>, <em>hard_rock=False</em>, <em>random_state=None</em>, <em>samples=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/error_model.html#ErrorModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.ErrorModel.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict the user&#8217;s accuracy on the beatmap with the given mods.</p>
