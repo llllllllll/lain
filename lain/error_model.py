@@ -836,6 +836,17 @@ class ErrorModel:
         self._non_hidden_model = _InnerErrorModel(False, *args, **kwargs)
 
     def save_path(self, path):
+        """Serialize the model as a directory.
+
+        Parameters
+        ----------
+        path : path-like
+            The path to the directory to serialize the model to.
+
+        See Also
+        --------
+        lain.ErrorModel.load_path
+        """
         path = pathlib.Path(path)
         path.mkdir(exist_ok=True)
         (path / 'version').write_text(str(self.version))
@@ -844,6 +855,22 @@ class ErrorModel:
 
     @classmethod
     def load_path(cls, path):
+        """Deserialize a model from a directory.
+
+        Parameters
+        ----------
+        path : path-like
+            The path to the directory to load.
+
+        Returns
+        -------
+        self : lain.ErrorModel
+            The loaded model.
+
+        See Also
+        --------
+        lain.ErrorModel.save_path
+        """
         path = pathlib.Path(path)
         version = int((path / 'version').read_text())
         if version != cls.version:
