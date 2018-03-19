@@ -91,8 +91,6 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../lstm.html">LSTM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../mlp.html">Multiayer Perceptron</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../appendix.html">Appendix</a></li>
 </ul>
 
@@ -160,6 +158,8 @@
   <h1>Source code for lain.train</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
 
 <span class="kn">from</span> <span class="nn">slider.game_mode</span> <span class="k">import</span> <span class="n">GameMode</span>
 <span class="kn">from</span> <span class="nn">slider.replay</span> <span class="k">import</span> <span class="n">Replay</span>
@@ -170,7 +170,8 @@
                           <span class="n">library</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">age</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                          <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Load all eligible replays from a directory.</span>
 
 <span class="sd">    Parameters</span>
@@ -186,6 +187,8 @@
 <span class="sd">    save: bool, optional</span>
 <span class="sd">        If the beatmap does not exist, and a client is used to fetch it, should</span>
 <span class="sd">        the beatmap be saved to disk?</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Print error information to stderr?</span>
 
 <span class="sd">    Yields</span>
 <span class="sd">    ------</span>
@@ -210,6 +213,10 @@
                     <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;failed to read replay </span><span class="si">{entry}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+                    <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+
                 <span class="c1"># throw out any maps that fail to parse or download</span>
                 <span class="k">continue</span>
 

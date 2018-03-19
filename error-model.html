@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ErrorModel &mdash; lain 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="lain 0.1.0 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> lain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">lain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>ErrorModel</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/error-model.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="errormodel">
+<h1>ErrorModel<a class="headerlink" href="#errormodel" title="Permalink to this headline">¶</a></h1>
+<p>The goal of the <a class="reference internal" href="appendix.html#lain.ErrorModel" title="lain.ErrorModel"><code class="xref py py-class docutils literal"><span class="pre">ErrorModel</span></code></a> model is to learn the user&#8217;s
+tendencies by looking at maps on the detail individual hit objects. The error
+model tries to predict the user&#8217;s expected accuracy by learning what their
+expected error will be on any given object.</p>
+<p>the ErrorModel model defines two kinds of error:</p>
+<div class="section" id="aim-error">
+<h2>Aim Error<a class="headerlink" href="#aim-error" title="Permalink to this headline">¶</a></h2>
+<p>The distance between the (x, y) coordinate of the user&#8217;s click and the center of
+the given hit object. For sliders, this is the slider head.</p>
+</div>
+<div class="section" id="accuracy-error">
+<h2>Accuracy Error<a class="headerlink" href="#accuracy-error" title="Permalink to this headline">¶</a></h2>
+<p>The absolute value of the difference between the time the user clicked and the
+time when a hit object appears in the map.</p>
+<div class="section" id="events">
+<h3>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h3>
+<p>The ErrorModel model works by breaking down a beatmap into a sequence of events. An
+event is defined as the (x, y, time) position of each circle, slider, or slider
+tick. Spinners are not included in the events because, for the users and maps we
+are interested in working with, spinners always result in a score of 300 and can
+be omitted. Each event is also tagged with a boolean value indicating whether it
+is a slider tick or hit object as well as the effective approach rate for the
+beatmap in milliseconds.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Effective approach rate is the approach rate accounting for double time and
+half time which do not change the displayed AR value but change the distance
+between a circle appearing and being clicked.</p>
+</div>
+</div>
+<div class="section" id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<p>After extracting the sequence of events from a beatmap, the error model takes a
+sliding window over the events . Each window is designed to capture some leading
+and trailing context for a given hit object. Windows are only ever &#8220;centered&#8221;
+around hit objects, not slider ticks. By default, the leading context is much
+longer than the trailing context because users cannot see more than a few events
+in front of an object. More experimentation could be done to account for users
+who remember the trailing context from past plays.</p>
+<p>Each event in the window is augmented with the (x, y, time) relative to the
+&#8220;center&#8221; of the window. For example, if my window x values were: [2, 4, 6], we
+would also add a relative x feature with: [-4, -2, 0].</p>
+<p>The window is labeled with the aim error and accuracy error for the &#8220;center&#8221; hit
+object.</p>
+</div>
+<div class="section" id="network">
+<h3>Network<a class="headerlink" href="#network" title="Permalink to this headline">¶</a></h3>
+<p>The network consists of stacked long short-term memory layers feeding into one
+densly connected layer for each error output.</p>
+<p>To better learn what the user finds difficult, we weigh the samples based on
+their zscore. Concretely we clip the zscore from 1 to 4 and weigh the samples
+based on that value.</p>
+</div>
+<div class="section" id="reducing-error-to-accuracy">
+<h3>Reducing Error to Accuracy<a class="headerlink" href="#reducing-error-to-accuracy" title="Permalink to this headline">¶</a></h3>
+<p>The overall goal is to predict a user&#8217;s accuracy. The error model reduces the
+predicted errors into a scalar accuracy by fitting one log-normal distribution
+for each set of predicted errors.</p>
+<p>To get the probability of missing the object from aim error we take the
+cumulative distribution function of the aim error distribution at the radius of
+the circles for the given map.</p>
+<p>To find the expected accuracy we need to calculate the probability of clicking
+within the 300 threshold, between the 300 and 100 thresholds, and between the
+100 and 50 thresholds. To find the probability that a click falls between the
+given thresholds we need to integrate the pdf from the starting threshold to the
+ending threshold. We weigh the probabilities by the accuracy the givey, so we
+multiply the probability of clicking within the 300 range by 1, we multiply the
+probability of clicking within the 300-100 range by 1 / 3, we multiply the
+probability of clicking within the 100-50 range by 1 / 6, and finally we
+implicitly multiply the probability of missing entirely by 0. The expected
+accuracy value is the sum of these weighted probabilities.</p>
+<p>The final expected score is the expected aim multiplied by the expected
+accuracy.</p>
+</div>
+<div class="section" id="pessimism-factors">
+<h3>Pessimism Factors<a class="headerlink" href="#pessimism-factors" title="Permalink to this headline">¶</a></h3>
+<p>Replays are only saved when a user completes a song. This heavily biases the
+input samples to only be the user&#8217;s best replays and makes it hard if not
+impossible to learn what the user finds hard. We need to magnify the projected
+error to actually see some misses or 50s so we apply a scaling factor.</p>
+<p>Currently this is quite small at 1.05 for both aim and accuracy error.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Joe Jevnik.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

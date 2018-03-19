@@ -1,20 +1,13 @@
 Appendix
 ========
 
-Interface
+Models
 ---------
 
-.. autoclass:: lain.OsuModel
+.. autoclass:: lain.ErrorModel
+
+.. autoclass:: lain.error_model.Prediction
    :members:
-
-LSTM
-----
-
-.. autoclass:: lain.LSTM
-
-MLPRegressor
-
-.. autoclass:: lain.MLPRegressor
 
 Utilities
 ----------

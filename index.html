@@ -36,7 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="lain 0.1.0 documentation" href="#"/>
-        <link rel="next" title="LSTM" href="lstm.html"/> 
+        <link rel="next" title="Appendix" href="appendix.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -91,8 +91,6 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="lstm.html">LSTM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mlp.html">Multiayer Perceptron</a></li>
 <li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
 </ul>
 
@@ -164,41 +162,18 @@ scores.</p>
 <p>This project exists to build better recommendation systems for osu! as well as
 explore how different users play osu!.</p>
 <p>Lain is currently being used to power: <a class="reference external" href="https://github.com/llllllllll/combine">combine</a></p>
-<div class="section" id="lstm">
-<h2>LSTM<a class="headerlink" href="#lstm" title="Permalink to this headline">¶</a></h2>
-<p>The goal of the LSTM model is to learn the user&#8217;s tendencies by looking at maps
-on the detail individual hit objects. The LSTM model tries to predict the user&#8217;s
-expected accuracy by learning what their expected error will be on any given
-object.</p>
-<p>For more information see <a class="reference external" href="https://llllllllll.github.io/lain/lstm.html">the docs</a>.</p>
-</div>
-<div class="section" id="multiayer-perceptron">
-<h2>Multiayer Perceptron<a class="headerlink" href="#multiayer-perceptron" title="Permalink to this headline">¶</a></h2>
-<p>The goal of the multilayer perceptron model is to learn how a user performs by
-looking at many weakly predictive features of beatmaps.</p>
-<p>For more information see <a class="reference external" href="https://llllllllll.github.io/lain/mlp.html">the docs</a>.</p>
+<div class="section" id="error-model">
+<h2>Error Model<a class="headerlink" href="#error-model" title="Permalink to this headline">¶</a></h2>
+<p>The goal of the error model is to learn the user&#8217;s tendencies by looking at maps
+on the detail individual hit objects. The error model tries to predict the
+user&#8217;s expected accuracy by learning what their expected aim and accuracy error
+will be on any given object.</p>
+<p>For more information see <a class="reference external" href="https://llllllllll.github.io/lain/error-model.html">the docs</a>.</p>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="lstm.html">LSTM</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="lstm.html#aim-error">Aim Error</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lstm.html#accuracy-error">Accuracy Error</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="mlp.html">Multiayer Perceptron</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mlp.html#basic-attributes">Basic Attributes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mlp.html#mods">Mods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mlp.html#bpm">BPM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mlp.html#hit-objects">Hit Objects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mlp.html#note-angles">Note Angles</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mlp.html#id4">Rationale</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mlp.html#osu-difficulty-metrics">Osu! Difficulty Metrics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mlp.html#performance-points-curve">Performance Points Curve</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="appendix.html#interface">Interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="appendix.html#lstm">LSTM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix.html#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="appendix.html#utilities">Utilities</a></li>
 </ul>
 </li>
@@ -225,7 +200,7 @@ looking at many weakly predictive features of beatmaps.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="lstm.html" class="btn btn-neutral float-right" title="LSTM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="appendix.html" class="btn btn-neutral float-right" title="Appendix" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>
