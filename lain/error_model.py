@@ -61,18 +61,6 @@ class Prediction:
         """
         return 1 - self.miss_chance
 
-    def to_dict(self):
-        """Convert the results to a dictionary.
-
-        Returns
-        -------
-        d : dict
-            A dictionary with all of the fields an properties.
-        """
-        out = vars(self).copy()
-        out['full_clear_chance'] = self.full_clear_chance
-        return out
-
 
 class _InnerErrorModel:
     """A model for osu! which trains on windows of time events and attempts to
