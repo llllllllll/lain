@@ -6,6 +6,9 @@ Models
 
 .. autoclass:: lain.ErrorModel
 
+.. autoclass:: lain.error_model.Prediction
+   :members:
+
 Utilities
 ----------
 

@@ -5,7 +5,6 @@
    :caption: Contents:
 
    lstm
-   mlp
    appendix
 
 Indices and tables
