@@ -226,6 +226,58 @@ padded to fit this shape.</p>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="lain.ErrorModel.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>beatmap</em>, <em>*</em>, <em>pessimistic=True</em>, <em>hidden=False</em>, <em>double_time=False</em>, <em>half_time=False</em>, <em>hard_rock=False</em>, <em>random_state=None</em>, <em>samples=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/error_model.html#ErrorModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.ErrorModel.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the user&#8217;s accuracy on the beatmap with the given mods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>beatmap</strong> : sl.Beatmap</p>
+<blockquote>
+<div><p>The beatmap to predict.</p>
+</div></blockquote>
+<p><strong>pessimistic</strong> : bool, optional</p>
+<blockquote>
+<div><p>Apply pessimistic error scaling?</p>
+</div></blockquote>
+<p><strong>hidden</strong> : bool, optional</p>
+<blockquote>
+<div><p>Predict performance with hidden?</p>
+</div></blockquote>
+<p><strong>double_time</strong> : bool, optional</p>
+<blockquote>
+<div><p>Predict performance with double time?</p>
+</div></blockquote>
+<p><strong>half_time</strong> : bool, optional</p>
+<blockquote>
+<div><p>Predict performance with half time?</p>
+</div></blockquote>
+<p><strong>hard_rock</strong> : bool, optional</p>
+<blockquote>
+<div><p>Predict performance with hard rock?</p>
+</div></blockquote>
+<p><strong>random_state</strong> : np.random.RandomState, optional</p>
+<blockquote>
+<div><p>The numpy random state used to draw samples.</p>
+</div></blockquote>
+<p><strong>samples</strong> : int, optional</p>
+<blockquote>
+<div><p>The number of plays to simulate.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>prediction</strong> : Prediction</p>
+<blockquote class="last">
+<div><p>A collection of predicted values for this play.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
