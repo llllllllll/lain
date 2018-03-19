@@ -4,7 +4,7 @@
    :maxdepth: 2
    :caption: Contents:
 
-   lstm
+   error-model
    appendix
 
 Indices and tables

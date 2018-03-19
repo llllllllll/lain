@@ -36,7 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="lain 0.1.0 documentation" href="index.html"/>
-        <link rel="prev" title="lain" href="index.html"/> 
+        <link rel="prev" title="ErrorModel" href="error-model.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -91,6 +91,7 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="error-model.html">ErrorModel</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Appendix</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#utilities">Utilities</a></li>
@@ -263,6 +264,34 @@ hidden.</p>
 </table>
 </dd></dl>
 
+<dl class="classmethod">
+<dt id="lain.ErrorModel.load_path">
+<em class="property">classmethod </em><code class="descname">load_path</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/error_model.html#ErrorModel.load_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.ErrorModel.load_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserialize a model from a directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> : path-like</p>
+<blockquote>
+<div><p>The path to the directory to load.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>self</strong> : lain.ErrorModel</p>
+<blockquote class="last">
+<div><p>The loaded model.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#lain.ErrorModel.save_path" title="lain.ErrorModel.save_path"><code class="xref py py-obj docutils literal"><span class="pre">lain.ErrorModel.save_path</span></code></a></p>
+</div>
+</dd></dl>
+
 <dl class="method">
 <dt id="lain.ErrorModel.predict">
 <code class="descname">predict</code><span class="sig-paren">(</span><em>beatmap</em>, <em>*</em>, <em>pessimistic=True</em>, <em>hidden=False</em>, <em>double_time=False</em>, <em>half_time=False</em>, <em>hard_rock=False</em>, <em>random_state=None</em>, <em>samples=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/error_model.html#ErrorModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.ErrorModel.predict" title="Permalink to this definition">¶</a></dt>
@@ -313,6 +342,28 @@ hidden.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lain.ErrorModel.save_path">
+<code class="descname">save_path</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lain/error_model.html#ErrorModel.save_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lain.ErrorModel.save_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize the model as a directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> : path-like</p>
+<blockquote class="last">
+<div><p>The path to the directory to serialize the model to.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#lain.ErrorModel.load_path" title="lain.ErrorModel.load_path"><code class="xref py py-obj docutils literal"><span class="pre">lain.ErrorModel.load_path</span></code></a></p>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -520,7 +571,7 @@ for this beatmap.</p>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="index.html" class="btn btn-neutral" title="lain" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="error-model.html" class="btn btn-neutral" title="ErrorModel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
