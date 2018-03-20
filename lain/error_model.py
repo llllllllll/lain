@@ -749,9 +749,9 @@ class _InnerErrorModel:
             predicted_accuracy_error=accuracy_error,
             predicted_accuracy_distribution=accuracy_distribution,
             accuracy_mean=simulated_accuracies.mean(),
-            accuracy_std=simulated_accuracies.std(),
+            accuracy_std=simulated_accuracies.std(ddof=1),
             pp_mean=simulated_pp.mean(),
-            pp_std=simulated_pp.std(),
+            pp_std=simulated_pp.std(ddof=1),
         )
 
     def save_path(self, path):
