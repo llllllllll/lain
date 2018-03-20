@@ -41,8 +41,7 @@ class Prediction:
                  accuracy_mean,
                  accuracy_std,
                  pp_mean,
-                 pp_std,
-                 miss_chance):
+                 pp_std):
         self.predicted_aim_error = predicted_aim_error
         self.predicted_aim_distribution = predicted_aim_distribution
         self.predicted_accuracy_error = predicted_accuracy_error
