@@ -31,8 +31,6 @@ class Prediction:
         The mean predicted performance points.
     pp_std : float
         The standard deviation of the predicted performance points.
-    miss_chance : float
-        The chance to miss at least one circle in the beatmap.
     """
     def __init__(self,
                  *,
@@ -53,13 +51,6 @@ class Prediction:
         self.accuracy_std = accuracy_std
         self.pp_mean = pp_mean
         self.pp_std = pp_std
-        self.miss_chance = miss_chance
-
-    @property
-    def full_clear_chance(self):
-        """The chance to full clear the beatmap.
-        """
-        return 1 - self.miss_chance
 
 
 class _InnerErrorModel:
@@ -753,9 +744,6 @@ class _InnerErrorModel:
             half_time=half_time,
         )
 
-        chance_to_miss_scalar = aim_distribution.cdf(circle_radius)
-        miss_chance = chance_to_miss_scalar ** predicted_object_count
-
         return Prediction(
             predicted_aim_error=aim_error,
             predicted_aim_distribution=aim_distribution,
@@ -765,7 +753,6 @@ class _InnerErrorModel:
             accuracy_std=simulated_accuracies.std(),
             pp_mean=simulated_pp.mean(),
             pp_std=simulated_pp.std(),
-            miss_chance=miss_chance,
         )
 
     def save_path(self, path):
