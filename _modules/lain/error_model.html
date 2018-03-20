@@ -190,8 +190,6 @@
 <span class="sd">        The mean predicted performance points.</span>
 <span class="sd">    pp_std : float</span>
 <span class="sd">        The standard deviation of the predicted performance points.</span>
-<span class="sd">    miss_chance : float</span>
-<span class="sd">        The chance to miss at least one circle in the beatmap.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="o">*</span><span class="p">,</span>
@@ -211,14 +209,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">accuracy_mean</span> <span class="o">=</span> <span class="n">accuracy_mean</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">accuracy_std</span> <span class="o">=</span> <span class="n">accuracy_std</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pp_mean</span> <span class="o">=</span> <span class="n">pp_mean</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pp_std</span> <span class="o">=</span> <span class="n">pp_std</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">miss_chance</span> <span class="o">=</span> <span class="n">miss_chance</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">full_clear_chance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The chance to full clear the beatmap.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">miss_chance</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pp_std</span> <span class="o">=</span> <span class="n">pp_std</span></div>
 
 
 <span class="k">class</span> <span class="nc">_InnerErrorModel</span><span class="p">:</span>
@@ -912,9 +903,6 @@
             <span class="n">half_time</span><span class="o">=</span><span class="n">half_time</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">chance_to_miss_scalar</span> <span class="o">=</span> <span class="n">aim_distribution</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">circle_radius</span><span class="p">)</span>
-        <span class="n">miss_chance</span> <span class="o">=</span> <span class="n">chance_to_miss_scalar</span> <span class="o">**</span> <span class="n">predicted_object_count</span>
-
         <span class="k">return</span> <span class="n">Prediction</span><span class="p">(</span>
             <span class="n">predicted_aim_error</span><span class="o">=</span><span class="n">aim_error</span><span class="p">,</span>
             <span class="n">predicted_aim_distribution</span><span class="o">=</span><span class="n">aim_distribution</span><span class="p">,</span>
@@ -924,7 +912,6 @@
             <span class="n">accuracy_std</span><span class="o">=</span><span class="n">simulated_accuracies</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span>
             <span class="n">pp_mean</span><span class="o">=</span><span class="n">simulated_pp</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
             <span class="n">pp_std</span><span class="o">=</span><span class="n">simulated_pp</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span>
-            <span class="n">miss_chance</span><span class="o">=</span><span class="n">miss_chance</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">save_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
