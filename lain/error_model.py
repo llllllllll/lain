@@ -51,6 +51,13 @@ class Prediction:
         self.pp_mean = pp_mean
         self.pp_std = pp_std
 
+    def __repr__(self):
+        return (
+            f'<{type(self).__name__}:'
+            f' {self.accuracy_mean * 100:.2f}% +-'
+            f' {self.accuracy_std * 100:.2f}% (mean +- std)>'
+        )
+
 
 class _InnerErrorModel:
     """A model for osu! which trains on windows of time events and attempts to
